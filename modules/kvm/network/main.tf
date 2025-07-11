@@ -7,7 +7,7 @@ resource "libvirt_network" "network_up_link" {
 }
 
 resource "libvirt_network" "network_LAN" {
-    count   = 3 * var.LAN_count
+    count   = var.LAN_interfaces_count * var.LAN_count
     name    = "${var.LAN_name}_LAN_${count.index}"
     mode    = "none"
     autostart = var.autostart
