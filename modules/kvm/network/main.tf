@@ -1,18 +1,12 @@
-resource "libvirt_network" "mikrotik_network_up_link" {
-    count   = 1 * var.mikrotik_count
-    name    = "mikrotik-net-up-link-${count.index}"
+resource "libvirt_network" "network_up_link" {
+    count   = var.UP_link_name != null && var.UP_link_address_net != null ? 1 : 0
+    name    = "${var.UP_link_name}_up_link"
     mode    = "nat"
-    addresses = ["10.10.${count.index}.0/24"]
+    addresses = ["${var.UP_link_address_net}"]
 }
 
-resource "libvirt_network" "mikrotik_network_P2P" {
-    count   = 1 * var.mikrotik_count
-    name    = "mikrotik-net-p2p-${count.index}"
-    mode    = "none"
-}
-
-resource "libvirt_network" "mikrotik_network_LAN" {
-    count   = 3 * var.mikrotik_count
-    name    = "mikrotik-net-${count.index}"
+resource "libvirt_network" "network_LAN" {
+    count   = 3 * var.LAN_count
+    name    = "${var.LAN_name}_LAN_${count.index}"
     mode    = "none"
 }

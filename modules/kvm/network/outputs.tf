@@ -1,11 +1,9 @@
-output "mikrotik_interface_up_link_id" {
-  value       = libvirt_network.mikrotik_network_up_link[*].id
+output "interface_up_link_id" {
+  value       = libvirt_network.network_up_link[0].id
+  description = "ID of the UP-LINK net"
 }
 
-output "mikrotik_interface_p2p_id" {
-  value       = libvirt_network.mikrotik_network_P2P[*].id
-}
-
-output "mikrotik_interface_lan_id" {
-  value       = libvirt_network.mikrotik_network_LAN[*].id
+output "interface_lan_ids" {
+  value       = libvirt_network.network_LAN[*].id
+  description = "IDs of the LAN net"
 }

@@ -1,7 +1,7 @@
-resource "libvirt_pool" "mikrotik_pool" {
-    name    = "mikrotik-volume-pool"
+resource "libvirt_pool" "pool" {
+    name    = "${var.pool_name}_volume_pool"
     type    = "dir"
     target {
-        path = var.mikrotik_pool_dir
+        path = var.pool_dir
     }
 }

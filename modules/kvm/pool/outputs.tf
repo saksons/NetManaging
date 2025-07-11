@@ -1,3 +1,4 @@
-output "mikrotik_pool_name" {
-    value = libvirt_pool.mikrotik_pool.name
+output "pool_name" {
+    value       = libvirt_pool.pool.name
+    description = "libvirt pool name for creating volume"
 }

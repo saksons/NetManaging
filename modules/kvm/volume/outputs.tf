@@ -1,3 +1,4 @@
-output "mikrotik_worker_image_id" {
-  value       = libvirt_volume.mikrotik_worker_image[*].id
+output "worker_image_ids" {
+  value       = libvirt_volume.worker_image[*].id
+  description = "Libvirt volume ids for creating disk in vm"
 }

@@ -1,4 +1,9 @@
-variable "mikrotik_pool_dir" {
+variable "pool_name" {
     type = string
-    default = "/opt/mikrotikpool"
+    description = "Name of the libvirt pool"
+}
+
+variable "pool_dir" {
+    type = string
+    description = "Linux dir for libvirt pool"
 }
