@@ -6,7 +6,6 @@ variable "UP_link_name" {
 variable "UP_link_address_net" {
   type        = string
   description = "Addresses of the net UP-LINK"
-  default = "10.10.10.0/24"
 }
 
 variable "LAN_count" {
@@ -22,4 +21,9 @@ variable "LAN_interfaces_count" {
 variable "LAN_name" {
   type        = string
   description = "Name of the net LAN"
+}
+
+variable "autostart" {
+  type        = bool
+  description = "Autostart at system boot"
 }

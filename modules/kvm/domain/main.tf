@@ -1,9 +1,10 @@
 resource "libvirt_domain" "vm" {
-    count   = var.vm_count
-    name    = "${var.name}_${count.index}"
-    vcpu    = var.vcpu
-    memory  = var.memory
-    running = var.running
+    count     = var.vm_count
+    name      = "${var.name}_${count.index}"
+    vcpu      = var.vcpu
+    memory    = var.memory
+    running   = var.running
+    autostart = var.autostart
     console {
         type = "pty"
         target_type = "serial"

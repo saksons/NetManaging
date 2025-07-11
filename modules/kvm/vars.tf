@@ -50,6 +50,12 @@ variable "running" {
   default     = true
 }
 
+variable "autostart" {
+  type        = bool
+  description = "Autostart at system boot"
+  default = true
+}
+
 variable "vm_count" {
   type        = number
   description = "Count of the VMs"

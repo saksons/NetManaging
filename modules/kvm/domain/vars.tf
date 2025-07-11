@@ -23,6 +23,11 @@ variable "running" {
   description = "Will be started after applying"
 }
 
+variable "autostart" {
+  type        = bool
+  description = "Autostart at system boot"
+}
+
 variable "interface_up_link_id" {
   type        = string
   description = "ID of the UP-LINK interface"

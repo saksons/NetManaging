@@ -21,6 +21,7 @@ module "interfaces" {
     LAN_count            = var.vm_count
     LAN_interfaces_count = var.lan_interface_count
     LAN_name             = var.name
+    autostart            = var.autostart
 }
 
 module "vm" {
@@ -29,7 +30,8 @@ module "vm" {
     name                 = var.name
     vcpu                 = var.vcpu
     memory               = var.memory
-    running = var.running
+    running              = var.running
+    autostart            = var.autostart
     interface_up_link_id = module.interfaces.interface_up_link_id
     interface_lan_ids    = module.interfaces.interface_lan_ids
     LAN_interfaces_count = var.lan_interface_count
