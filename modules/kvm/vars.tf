@@ -17,15 +17,36 @@ variable "base_image_path" {
 }
 
 # Interface settings
+variable "UP_link_usable" {
+  type        = bool
+  description = "Net 'UP_link' will be used"
+  default = true
+}
+
 variable "UP_link_address_net" {
   type        = string
   description = "Addresses of the net UP-LINK"
   default = "10.10.10.0/24"
 }
 
-variable "lan_interface_count" {
-  type        = number
-  description = "Count of the net LAN from VMS"
+variable "LAN_usable" {
+  type        = bool
+  description = ""
+  default = false
+}
+
+variable "LAN_interface_names" {
+  type        = list
+  description = "Names of the net LAN"
+  nullable = true
+  default = null
+}
+
+variable "LAN_interface_connect_by_id" {
+  type        = list
+  description = "List of IDs for connection to LAN net"
+  nullable = true
+  default = null
 }
 
 # VM settings

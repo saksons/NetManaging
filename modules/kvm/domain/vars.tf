@@ -28,19 +28,28 @@ variable "autostart" {
   description = "Autostart at system boot"
 }
 
-variable "interface_up_link_id" {
+variable "UP_LINK_interface_id" {
   type        = string
   description = "ID of the UP-LINK interface"
+  nullable = true
 }
 
-variable "interface_lan_ids" {
+variable "LAN_interface_ids" {
   type        = list
   description = "IDs list of the LAN interfaces"
+  nullable    = true
 }
 
 variable "LAN_interfaces_count" {
   type        = number
   description = "Count of the LAN interfaces per VM"
+  nullable    = true
+}
+
+variable "LAN_interface_connect_by_id" {
+  type        = list
+  description = "List of IDs for connecting to the exists net"
+  nullable    = true
 }
 
 variable "worker_image_ids" {

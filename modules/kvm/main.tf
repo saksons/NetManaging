@@ -18,9 +18,10 @@ module "interfaces" {
     source               = "./network"
     UP_link_name         = var.name
     UP_link_address_net  = var.UP_link_address_net
+    UP_link_usable       = var.UP_link_usable
+    LAN_usable           = var.LAN_usable 
     LAN_count            = var.vm_count
-    LAN_interfaces_count = var.lan_interface_count
-    LAN_name             = var.name
+    LAN_interface_names  = var.LAN_interface_names
     autostart            = var.autostart
 }
 
@@ -32,8 +33,9 @@ module "vm" {
     memory               = var.memory
     running              = var.running
     autostart            = var.autostart
-    interface_up_link_id = module.interfaces.interface_up_link_id
-    interface_lan_ids    = module.interfaces.interface_lan_ids
-    LAN_interfaces_count = var.lan_interface_count
+    UP_LINK_interface_id = module.interfaces.UP_LINK_interface_id
+    LAN_interface_ids    = module.interfaces.LAN_interface_ids
+    LAN_interface_connect_by_id = var.LAN_interface_connect_by_id
+    LAN_interfaces_count = var.LAN_usable ? length(var.LAN_interface_names) : 0
     worker_image_ids     = module.images.worker_image_ids
 }
