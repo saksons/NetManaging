@@ -20,11 +20,7 @@ resource "libvirt_domain" "vm" {
     }
     # Creating new LAN interfaces if var.interface_lan_ids is not null
     dynamic "network_interface" {
-        for_each = var.LAN_interface_ids != null ? slice(
-            var.LAN_interface_ids,
-            count.index * var.LAN_interfaces_count,
-            (count.index + 1) * var.LAN_interfaces_count
-        ) : []
+        for_each = var.LAN_interface_ids != null ? var.LAN_interface_ids: []
         content {
             network_id = network_interface.value
         }
