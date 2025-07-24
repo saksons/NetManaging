@@ -56,3 +56,8 @@ variable "worker_image_ids" {
   type        = list
   description = "IDs list of the worker volumes"
 }
+
+variable "cloud_init_ids" {
+  type        = list
+  description = "value"
+}

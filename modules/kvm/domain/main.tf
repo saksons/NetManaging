@@ -36,4 +36,6 @@ resource "libvirt_domain" "vm" {
     disk {
         volume_id = var.worker_image_ids[count.index]
     }
+
+    cloudinit = var.cloud_init_ids[count.index]
 }

@@ -1,3 +1,8 @@
+resource "tls_private_key" "pki" {
+  algorithm = "RSA"
+  rsa_bits  = 4096
+}
+
 module "mikrotik_vm_controller" {
   source              = "./modules/kvm"
   pool_dir            = "/opt/libvirt_data/mikrotik_control"
@@ -11,6 +16,7 @@ module "mikrotik_vm_controller" {
   running             = true
   autostart           = true
   vm_count            = 1
+  cloud_init          = false
 }
 
 module "mikrotik_vm_worker" {
@@ -27,6 +33,7 @@ module "mikrotik_vm_worker" {
   running                     = true
   autostart                   = true
   vm_count                    = 1
+  cloud_init                  = false
 }
 
 module "main_arch_server" {
@@ -42,6 +49,8 @@ module "main_arch_server" {
   running                     = true
   autostart                   = true
   vm_count                    = 1
+  hostname                    = "main-arch"
+  public_key                  = tls_private_key.pki.public_key_openssh
 }
 
 module "test_arch_server" {
@@ -57,6 +66,8 @@ module "test_arch_server" {
   running                     = true
   autostart                   = true
   vm_count                    = 2
+  hostname                    = "test-arch"
+  public_key                  = tls_private_key.pki.public_key_openssh
 }
 
 module "k8s_cluster_control" {
@@ -72,6 +83,8 @@ module "k8s_cluster_control" {
   running                     = true
   autostart                   = true
   vm_count                    = 1
+  hostname                    = "control-k8s"
+  public_key                  = tls_private_key.pki.public_key_openssh
 }
 
 module "k8s_cluster_worker" {
@@ -87,4 +100,6 @@ module "k8s_cluster_worker" {
   running                     = true
   autostart                   = true
   vm_count                    = 3
+  hostname                    = "worker-k8s"
+  public_key                  = tls_private_key.pki.public_key_openssh
 }

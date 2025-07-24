@@ -49,6 +49,42 @@ variable "LAN_interface_connect_by_id" {
   default = null
 }
 
+# Cloud init
+variable "cloud_init" {
+  type        = bool
+  description = "Cloud-init will be used"
+  default     = true
+}
+
+variable "hostname" {
+  type        = string
+  description = "Hostname of the VM"
+  default    = null
+}
+
+variable "domain" {
+  type        = string
+  description = "Domain name for the VM"
+  default     = "soks.local"
+  # validation {
+  #   condition = strcontains(var.domain, '.')
+  #   error_merror_message = "Symbol '.' must be in variable"
+  # }
+}
+
+variable "public_key" {
+  type        = string
+  description = "Public key for the ssh on VM"
+  nullable    = true
+  default = "null"
+}
+
+variable "timezone" {
+  type        = string
+  description = "Timezone for the VM 'Region/City'"
+  default     = "Europe/Moscow"
+}
+
 # VM settings
 variable "name" {
   type        = string
@@ -74,7 +110,7 @@ variable "running" {
 variable "autostart" {
   type        = bool
   description = "Autostart at system boot"
-  default = true
+  default     = true
 }
 
 variable "vm_count" {
