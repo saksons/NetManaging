@@ -29,5 +29,5 @@ output "passwords_k8s_worker" {
 }
 
 output "console" {
-  value = file("bash ./console.sh")
+  value = "bash ./console.sh"
 }
