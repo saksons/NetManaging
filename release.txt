@@ -1,2 +1,2 @@
 Name (tag) | technology (branch) | version (suffix)
-IaC terraform v1.0.3
+IaC terraform v1.0.0
