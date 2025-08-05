@@ -1,0 +1,49 @@
+#!/usr/bin/expect -f
+
+# Настройки
+set timeout 20
+#set vm_name [lindex $argv 0]
+set pts [lindex $argv 0]
+set username "admin"
+set new_password [lindex $argv 1]
+set static_ip [lindex $argv 2]
+set interface [lindex $argv 3]
+
+# Запуск консоли
+#spawn virsh console $vm_name
+
+spawn minicom -D $pts
+
+# После подключения — отправляем Enter
+expect {
+    "(Ctrl + ])" {
+        send "\r"
+        exp_continue
+    }
+    "MikroTik Login:" {
+        send "$username\r"
+        exp_continue
+    }
+    "Password:" {
+        send "\n"
+        exp_continue
+    }
+    "Do you want to see the software license? \\\[Y/n\\\]:" {
+        send "n"
+        exp_continue
+    }
+    send "q\r"
+    "new password>" {
+        send "$new_password\r"
+        exp_continue
+    }
+    "repeat new password>" {
+        send "$new_password\r"
+        exp_continue
+    }
+    -re {\[[^\]]+\] >} {
+        send "/ip address add address=$static_ip interface=$interface\r"
+        expect -re {\[[^\]]+\] >}
+        send "quit\r"
+    }
+}
