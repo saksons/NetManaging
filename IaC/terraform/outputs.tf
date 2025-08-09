@@ -13,6 +13,16 @@ output "passwords_main_arch_server" {
   sensitive = true
 }
 
+output "passwords_replica_main_arch_server" {
+  value = module.replica_main_arch_server.passwords
+  sensitive = true
+}
+
+output "passwords_master_arch" {
+  value = module.master_arch.passwords
+  sensitive = true
+}
+
 output "passwords_test_arch_server" {
   value = module.test_arch_server.passwords
   sensitive = true

@@ -18,13 +18,6 @@ resource "libvirt_domain" "vm" {
             hostname   = "UP"
         }
     }
-    # Creating new LAN interfaces if var.interface_lan_ids is not null
-    dynamic "network_interface" {
-        for_each = var.LAN_interface_ids != null ? var.LAN_interface_ids: []
-        content {
-            network_id = network_interface.value
-        }
-    }
     # Connect to exists LAN interfaces by id if var.LAN_interface_connect_by_id is not null
     dynamic "network_interface" {
         for_each = var.LAN_interface_connect_by_id != null ? var.LAN_interface_connect_by_id : []
@@ -32,6 +25,13 @@ resource "libvirt_domain" "vm" {
             network_id = network_interface.value
         }
     }   
+    # Creating new LAN interfaces if var.interface_lan_ids is not null
+    dynamic "network_interface" {
+        for_each = var.LAN_interface_ids != null ? var.LAN_interface_ids: []
+        content {
+            network_id = network_interface.value
+        }
+    }
 
     disk {
         volume_id = var.worker_image_ids[count.index]
