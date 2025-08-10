@@ -8,6 +8,7 @@ module "mikrotik_vm_controller" {
   pool_dir            = "/opt/libvirt_data/mikrotik_control"
   base_image_path     = "/opt/iso/chr-7.19.2-base.qcow2"
   UP_link_usable      = true
+  UP_link_address_net = "10.10.10.0/24"
   LAN_usable          = true
   LAN_interface_names = ["p2p", "main_server"]
   name                = "mikrotik_control"
