@@ -151,9 +151,6 @@ module "setup_mikrotik_control" {
 module "setup_mikrotik_worker" {
   source          = "./modules/vm_net_setup"
   domain_name     = "${module.mikrotik_vm_worker.domain_name}_0"
-  address         = ""
-  net_mask        = ""
-  interface       = ""
   path_for_output = "./outputs"
   depends_on      = [ module.mikrotik_vm_worker ]
 }
