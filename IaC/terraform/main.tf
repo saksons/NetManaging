@@ -138,7 +138,7 @@ module "k8s_cluster_worker" {
   public_key                  = tls_private_key.pki.public_key_openssh
 }
 
-module "setup_net_address" {
+module "setup_mikrotik_control" {
   source          = "./modules/vm_net_setup"
   domain_name     = "${module.mikrotik_vm_controller.domain_name}_0"
   address         = "10.10.10.2"
@@ -146,6 +146,16 @@ module "setup_net_address" {
   interface       = "ether1"
   path_for_output = "./outputs"
   depends_on      = [ module.mikrotik_vm_controller ]
+}
+
+module "setup_mikrotik_worker" {
+  source          = "./modules/vm_net_setup"
+  domain_name     = "${module.mikrotik_vm_worker.domain_name}_0"
+  address         = ""
+  net_mask        = ""
+  interface       = ""
+  path_for_output = "./outputs"
+  depends_on      = [ module.mikrotik_vm_worker ]
 }
 
 # module "get_up_link_address" {
