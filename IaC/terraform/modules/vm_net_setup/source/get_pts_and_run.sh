@@ -7,10 +7,17 @@ then
     mkdir -p $path_for_output
 fi
 
+if [ ! -f $path_for_output/mikrotik.pass ];
+then 
+    data=$(jq -n '{}')
+else
+    data=$(jq '.' $path_for_output/mikrotik.pass)
+fi
+
 PTS=$(virsh dumpxml --domain $domain | grep /dev/pts | grep console | grep -o "tty='[^']*'" | cut -d"'" -f2)
 PASSWORD=$(< /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-8};echo;)
 
-echo -n $PASSWORD > $path_for_output/mikrotik_$domain.pass
+jq --arg key $domain --arg password $PASSWORD '. + {$key: $password}' <<< "$data" > $path_for_output/mikrotik.pass
 
 if [[ $address == "" ]];
 then
