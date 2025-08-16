@@ -1,6 +1,11 @@
 #/usr/bin/env bash
 
-mkdir creds
+source ../.env
+
+if [ ! -d ./creds ];
+then 
+    mkdir ./creds
+fi
 
 get_pass(){
     data=$(jq -n '{}')
@@ -20,16 +25,14 @@ get_pass(){
 }
 
 output_nftables() {
-    interface=$(ip -br a | grep 10.10.10 | awk -F ' ' '{ printf $1 }')
-    cat << EOF > ./creds/nftables.conf
-define qemu _bridge_if = "$interface"
-
+    interface=$(ip -br a  | grep $(echo "$KVM_NET" |awk -F'/' '{ printf $1 }' | awk -F'.' '{ printf $1"."$2"."$3 }') | awk -F ' ' '{ printf $1 }')
+    cat << EOF
 table ip nat {
     chain postrouting {
         type nat hook postrouting priority 100; policy accept;
         
         # "masquerade" means the servers to which one connects from the VM can't tell packets are coming from the latter
-        ip saddr 10.10.10.0/24 masquerade
+        ip saddr $KVM_NET masquerade
     }
 }
 
@@ -38,7 +41,7 @@ table inet filter {
     chain input {
         
         # -------------------------------- qemu
-        iifname $qemu_bridge_if accept  comment "accept from virtual VM"
+        iifname $interface accept  comment "accept from virtual VM"
         
         # packets that reach here are bound to be dropped
         counter comment "count dropped packets"
@@ -48,8 +51,8 @@ table inet filter {
         type filter hook forward priority 0; policy drop;
         
         # -------------------------------- qemu
-        iifname $qemu_bridge_if accept  comment "accept VM interface as input"
-        oifname $qemu_bridge_if accept comment "accept VM interface as output"
+        iifname $interface accept  comment "accept VM interface as input"
+        oifname $interface accept comment "accept VM interface as output"
         
         counter comment "count dropped packets"
     }
@@ -57,10 +60,11 @@ table inet filter {
 EOF
 }
 
+get_pass
 echo $data | jq > ./creds/password.json
 
 sudo terraform output -raw private_key > ./creds/private_key.pem
-output_nftables
+output_nftables > ./creds/nftables.conf
 
 echo "==============="
 echo "ssh -i ./creds/private_key.pem arch@{ip}"
