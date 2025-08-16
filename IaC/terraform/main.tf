@@ -153,7 +153,7 @@ module "setup_mikrotik_worker" {
   source          = "./modules/vm_net_setup"
   domain_name     = "${module.mikrotik_vm_worker.domain_name}_0"
   path_for_output = "./outputs"
-  depends_on      = [ module.mikrotik_vm_worker, module.setup_mikrotik_control ]
+  depends_on      = [ module.mikrotik_vm_worker]
 }
 
 # module "get_up_link_address" {

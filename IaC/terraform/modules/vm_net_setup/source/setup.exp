@@ -11,10 +11,6 @@ spawn minicom -D $pts
 
 # После подключения — отправляем Enter
 expect {
-    "(Ctrl + ])" {
-        send "\r"
-        exp_continue
-    }
     "MikroTik Login:" {
         send "$username\r"
         exp_continue
