@@ -1,0 +1,59 @@
+---
+- name: Setup default route
+  community.routeros.command:
+    commands:
+      - "/ip/route/add dst-address=\"0.0.0.0/0\" gateway=\"{{ item.gateway }}\" comment=\"{{ item.comment }}\""
+  loop: "{{ vars[role_target].up }}"
+- name: Setup interfaces
+  community.routeros.command:
+    commands:
+      - "/interface/set {{ item.interface }} comment=\"{{ item.comment }}\""
+  loop: "{{ vars[role_target].interfaces }}"
+- name: Setup addresses
+  community.routeros.command:
+    commands:
+      - "/ip/address/add address=\"{{ item.address }}\" interface=\"{{ item.interface }}\" comment=\"{{ item.comment }}\""
+  loop: "{{ vars[role_target].addresses }}"
+- name: Setup NAT forwarding
+  community.routeros.command:
+    commands:
+      - "/ip/firewall/nat/add chain=srcnat src-address={{ item['src-address'] }} out-interface={{ item['out-interface'] }} action=masquerade"
+  loop: "{{ vars[role_target].nat }}"
+
+- name: Setup dhcp-server
+  community.routeros.command:
+    commands:
+      - "/ip/dhcp-server/add name=\"{{ item.dhcp_name }}\" interface=\"{{ item.interface }}\" comment=\"{{ item.comment }}\""
+      - "/ip/dhcp-server/enable {{ item.dhcp_name }}"
+  loop: "{{ vars[role_target].dhcp }}"
+
+- name: Setup dhcp-option
+  community.routeros.command:
+    commands:
+      - "/ip/dhcp-server/option/add name=route-to-0x{{ item.gateway }} code=3 value=0x{{ item.gateway }}"
+  loop: "{{ vars[role_target].domain2address }}"
+
+- name: Setup dhcp-leases
+  community.routeros.command:
+    commands:
+      - "/ip/dhcp-server/lease/add address=\"{{ item.address }}\" mac-address=\"{{ macs[item.hostname + '_mac'] }}\"  dhcp-option=\"route-to-0x{{ item.gateway }}\" comment=\"{{ item.comment }}\" server=\"{{ item.server }}\""
+  loop: "{{ vars[role_target].domain2address }}"
+
+# - block:
+#     - name: Set password for mikrotik-worker
+#       community.routeros.command:
+#         commands:
+#           - "/system/ssh address=\"{{ worker.address }}\" user=\"{{ worker.user }}\" command=\"/user/set {{ worker.user }} password={{ worker_password }}\""
+#   when: role_target == "master"
+
+- name: Setup OSPF and areas
+  community.routeros.command:
+    commands:
+      - "/routing/ospf/instance/add name={{ vars[role_target].ospf.instance_name }} router-id={{ vars[role_target].ospf.instance_id }}"
+      - "/routing/ospf/area/add name={{ vars[role_target].ospf.area_name }} area-id={{ vars[role_target].ospf.area_id }} instance={{ vars[role_target].ospf.instance_name }}"
+
+- name: Setup OSPF networks
+  community.routeros.command:
+    commands:
+      - "/routing/ospf/interface-template/add networks={{ item.net }} area={{ vars[role_target].ospf.area_name }} type={{ item.type }}"
+  loop: "{{ vars[role_target].ospf.networks }}"

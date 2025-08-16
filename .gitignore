@@ -40,4 +40,3 @@ terraform.rc
 creds
 outputs
 *.lock*
-ansible

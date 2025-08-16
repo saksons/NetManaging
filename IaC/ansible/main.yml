@@ -1,0 +1,17 @@
+---
+- name: Run command on MikroTik master
+  gather_facts: no
+  hosts: mikrotik-master
+  roles:
+    - network-setup
+  vars:
+    "role_target": "master"
+    # "worker_password":  "{{ hostvars['mikrotik-worker'].ansible_password }}"
+
+- name: Run command on MikroTik worker
+  gather_facts: no
+  hosts: mikrotik-worker
+  roles:
+    - network-setup
+  vars:
+    "role_target": "worker"

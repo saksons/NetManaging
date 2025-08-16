@@ -1,0 +1,160 @@
+---
+networks:
+  - 192.168.77.0/24
+  - 192.168.88.0/24
+  - 192.168.50.0/24
+  - 192.168.100.0/24
+  
+master:
+  up:
+    - gateway: 10.10.10.1
+      comment: Default route
+
+  interfaces:
+    - interface: ether1
+      comment: UP-LINK
+    - interface: ether2
+      comment: MIKROTIK-WORKER
+    - interface: ether3
+      comment: ARCH-SERVERS
+
+  addresses:
+    - interface: ether2
+      address: 192.168.88.1/24
+      comment: MIKROTIK-WORKER-UP-LINK
+    - interface: ether3
+      address: 192.168.77.1/24
+      comment: ARCH-SERVERS-UP-LINK
+
+  nat:
+    - src-address: 192.168.77.0/24
+      out-interface: ether1
+    - src-address: 192.168.88.0/24
+      out-interface: ether1
+
+  dhcp:
+    - dhcp_name: mikrotik-worker
+      interface: ether2
+      comment: DHCP for MIKROTIK-WORKER
+    - dhcp_name: arch-servers
+      interface: ether3
+      comment: DHCP for ARCH-SERVERS
+
+# Gateway is HEX code
+  domain2address:
+    - hostname: main_arch_server_0
+      server: arch-servers
+      address: 192.168.77.2
+      gateway: C0A84D01
+      comment: Static IP for main arch server
+    - hostname: replica_main_arch_server_0
+      server: arch-servers
+      address: 192.168.77.3
+      gateway: C0A84D01
+      comment: Static IP for replica main arch server
+    - hostname: master_arch_0
+      server: arch-servers
+      address: 192.168.77.101
+      gateway: C0A84D01
+      comment: Static IP for master arch vm
+
+    - hostname: mikrotik_worker_0
+      server: mikrotik-worker
+      address: 192.168.88.2
+      gateway: C0A85801
+      comment: Static IP for worker mikrotik
+  ospf:
+    instance_name: area0
+    instance_id: 1.1.1.1
+    area_name: area0
+    area_id: 1.1.1.1
+    p2p:
+
+    networks:
+      - net: 10.10.10.0/24
+        type: broadcast
+      - net: 192.168.77.0/24
+        type: broadcast
+      - net: 192.168.88.0/24
+        type: ptp
+ 
+worker:
+  address: 192.168.88.2
+  user: admin
+  up:
+    - gateway: 192.168.88.1
+      comment: Default route
+
+  interfaces:
+    - interface: ether1
+      comment: P2P-LAN
+    - interface: ether2
+      comment: TEST-ARCH-SERVERS
+    - interface: ether3
+      comment: K8S
+
+  addresses:
+    - interface: ether2
+      address: 192.168.50.1/24
+      comment: K8S-UP-LINK
+    - interface: ether3
+      address: 192.168.100.1/24
+      comment: TEST-ARCH-SERVERS-UP-LINK
+
+  nat:
+    - src-address: 192.168.50.0/24
+      out-interface: ether1
+    - src-address: 192.168.100.0/24
+      out-interface: ether1
+
+  dhcp:
+    - dhcp_name: k8s
+      interface: ether2
+      comment: DHCP for K8S
+    - dhcp_name: test-arch-servers
+      interface: ether3
+      comment: DHCP for TEST-ARCH-SERVERS
+
+  domain2address:
+    - hostname: k8s_control_0
+      server: k8s
+      address: 192.168.50.2
+      gateway: C0A83201
+      comment: Static IP for k8s control plane
+    - hostname: k8s_worker_0
+      server: k8s
+      address: 192.168.50.3
+      gateway: C0A83201
+      comment: Static IP for k8s control plane
+    - hostname: k8s_worker_1
+      server: k8s
+      address: 192.168.50.4
+      gateway: C0A83201
+      comment: Static IP for k8s control plane
+    - hostname: k8s_worker_2
+      server: k8s
+      address: 192.168.50.5
+      gateway: C0A83201
+      comment: Static IP for k8s control plane
+    - hostname: test_arch_server_0
+      server: test-arch-servers
+      address: 192.168.100.2
+      gateway: C0A86401
+      comment: Static IP for test server 1
+    - hostname: test_arch_server_1
+      server: test-arch-servers
+      address: 192.168.100.3
+      gateway: C0A86401
+      comment: Static IP for test server 2
+  ospf:
+    instance_name: area0
+    instance_id: 2.2.2.2
+    area_name: area0
+    area_id: 1.1.1.1
+    networks:
+      - net: 192.168.88.0/24
+        type: ptp
+      - net: 192.168.50.0/24
+        type: broadcast
+      - net: 192.168.100.0/24
+        type: broadcast

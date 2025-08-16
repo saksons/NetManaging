@@ -1,0 +1,26 @@
+[MIKROTIKS]
+mikrotik-master      ansible_host=${mikrotik_address}   ansible_password=${mikrotik_control_0}
+mikrotik-worker      ansible_host=192.168.88.2 ansible_password=${mikrotik_worker_0}
+
+[MAIN_SERVERS]
+main-server          ansible_host=192.168.77.2 ansible_user=arch
+main-replica-server  ansible_host=192.168.77.3 ansible_user=arch
+
+[TEST_SERVERS]
+test-server-0        ansible_host=192.168.100.2 ansible_user=arch
+test-server-1        ansible_host=192.168.100.3 ansible_user=arch
+
+[K8S]
+k8s-cluster-control  ansible_host=192.168.50.2 ansible_user=arch
+k8s-cluster-worker-0 ansible_host=192.168.50.3 ansible_user=arch
+k8s-cluster-worker-1 ansible_host=192.168.50.4 ansible_user=arch
+k8s-cluster-worker-2 ansible_host=192.168.50.5 ansible_user=arch
+
+[ARCH:children]
+MAIN_SERVERS
+TEST_SERVERS
+K8S
+
+[ARCH_SERVERS:children]
+MAIN_SERVERS
+TEST_SERVERS

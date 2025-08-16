@@ -1,0 +1,11 @@
+---
+- name: Check existed routings
+  ansible.builtin.shell:
+    cmd: "ip route show"
+  register: routing
+
+- name: Setup routing table
+  ansible.builtin.shell:
+    cmd: "ip route add {{ item }} via 10.10.10.2"
+  when: routing.stdout.find(item) == -1
+  loop: "{{ networks }}"
