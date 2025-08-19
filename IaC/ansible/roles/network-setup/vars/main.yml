@@ -9,6 +9,9 @@ master:
   up:
     - gateway: 10.10.10.1
       comment: Default route
+  
+  system:
+    timezone: Europe/Moscow
 
   interfaces:
     - interface: ether1
@@ -31,6 +34,33 @@ master:
       out-interface: ether1
     - src-address: 192.168.88.0/24
       out-interface: ether1
+  
+  dns:
+    allow-remote-requests: 'yes'
+    servers: 10.10.10.2,8.8.8.8
+    records:
+      - domain: soksPC.soks.local
+        address: 10.10.10.1
+      - domain: mikrotik-control.soks.local
+        address: 10.10.10.2
+      - domain: main.soks.local
+        address: 192.168.77.2
+      - domain: main-replica.soks.local
+        address: 192.168.77.3
+      - domain: miktorik-worker.soks.local
+        address: 192.168.88.2
+      - domain: k8s-control.soks.local
+        address: 192.168.50.2
+      - domain: k8s-worker0.soks.local
+        address: 192.168.50.3
+      - domain: k8s-worker1.soks.local
+        address: 192.168.50.4
+      - domain: k8s-worker2.soks.local
+        address: 192.168.50.5
+      - domain: test0.soks.local
+        address: 192.168.100.2
+      - domain: test1.soks.local
+        address: 192.168.100.3
 
   dhcp:
     - dhcp_name: mikrotik-worker
@@ -40,28 +70,36 @@ master:
       interface: ether3
       comment: DHCP for ARCH-SERVERS
 
-# Gateway is HEX code
+# Gateway, dns, ntp is HEX code
   domain2address:
     - hostname: main_arch_server_0
       server: arch-servers
       address: 192.168.77.2
       gateway: C0A84D01
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for main arch server
     - hostname: replica_main_arch_server_0
       server: arch-servers
       address: 192.168.77.3
       gateway: C0A84D01
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for replica main arch server
     - hostname: master_arch_0
       server: arch-servers
       address: 192.168.77.101
       gateway: C0A84D01
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for master arch vm
 
     - hostname: mikrotik_worker_0
       server: mikrotik-worker
       address: 192.168.88.2
       gateway: C0A85801
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for worker mikrotik
   ospf:
     instance_name: area0
@@ -85,6 +123,9 @@ worker:
     - gateway: 192.168.88.1
       comment: Default route
 
+  system:
+    timezone: Europe/Moscow
+
   interfaces:
     - interface: ether1
       comment: P2P-LAN
@@ -107,6 +148,11 @@ worker:
     - src-address: 192.168.100.0/24
       out-interface: ether1
 
+  dns:
+    allow-remote-requests: 'yes'
+    servers: 10.10.10.2,8.8.8.8
+    records: []
+
   dhcp:
     - dhcp_name: k8s
       interface: ether2
@@ -120,31 +166,43 @@ worker:
       server: k8s
       address: 192.168.50.2
       gateway: C0A83201
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for k8s control plane
     - hostname: k8s_worker_0
       server: k8s
       address: 192.168.50.3
       gateway: C0A83201
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for k8s control plane
     - hostname: k8s_worker_1
       server: k8s
       address: 192.168.50.4
       gateway: C0A83201
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for k8s control plane
     - hostname: k8s_worker_2
       server: k8s
       address: 192.168.50.5
       gateway: C0A83201
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for k8s control plane
     - hostname: test_arch_server_0
       server: test-arch-servers
       address: 192.168.100.2
       gateway: C0A86401
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for test server 1
     - hostname: test_arch_server_1
       server: test-arch-servers
       address: 192.168.100.3
       gateway: C0A86401
+      dns: C0A84D01
+      ntp: C0A84D01
       comment: Static IP for test server 2
   ospf:
     instance_name: area0
