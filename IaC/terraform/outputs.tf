@@ -9,39 +9,10 @@ output "public_key" {
 }
 
 output "passwords_main_arch_server" {
-  value = module.main_arch_server.passwords
-  sensitive = true
-}
-
-output "passwords_replica_main_arch_server" {
-  value = module.replica_main_arch_server.passwords
-  sensitive = true
-}
-
-output "passwords_master_arch" {
-  value = module.master_arch.passwords
-  sensitive = true
-}
-
-output "passwords_test_arch_server" {
-  value = module.test_arch_server.passwords
-  sensitive = true
-}
-
-output "passwords_k8s_control" {
-  value = module.k8s_cluster_control.passwords
-  sensitive = true
-}
-
-output "passwords_k8s_worker" {
-  value = module.k8s_cluster_worker.passwords
+  value = random_password.pass.result
   sensitive = true
 }
 
 output "console" {
   value = "bash ./console.sh"
 }
-
-# output "mikrotik_control_ip_address" {
-#     value = module.get_up_link_address.net_info
-# }

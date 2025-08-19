@@ -3,164 +3,93 @@ resource "tls_private_key" "pki" {
   rsa_bits  = 4096
 }
 
-module "mikrotik_vm_controller" {
-  source              = "./modules/kvm"
-  pool_dir            = "/opt/libvirt_data/mikrotik_control"
-  base_image_path     = "/opt/iso/chr-7.19.2-base.qcow2"
-  UP_link_usable      = true
-  UP_link_address_net = local.envs.KVM_NET
-  LAN_usable          = true
-  LAN_interface_names = ["p2p", "main_server"]
-  name                = "mikrotik_control"
-  vcpu                = 1
-  memory              = 512
-  running             = true
-  autostart           = true
-  vm_count            = 1
-  cloud_init          = false
+resource "libvirt_pool" "openstack_server" {
+  name = "openstack_server_pool"
+  type = "dir"
+  target {
+    path = "/opt/libvirt_data/openstack_server"
+  }
 }
 
-module "mikrotik_vm_worker" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/mikrotik_worker"
-  base_image_path             = "/opt/iso/chr-7.19.2-base.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = true
-  LAN_interface_names         = ["k8s", "test_arch_servers"]
-  LAN_interface_connect_by_id = [module.mikrotik_vm_controller.LAN_ids_by_names["p2p_LAN"]]
-  name                        = "mikrotik_worker"
-  vcpu                        = 1
-  memory                      = 512
-  running                     = true
-  autostart                   = true
-  vm_count                    = 1
-  cloud_init                  = false
+resource "libvirt_volume" "openstack_server_base_image" {
+  name   = "openstack_server_base_image.qcow2"
+  pool   = libvirt_pool.openstack_server.name
+  source = "/opt/iso/ubuntu-24.10-server-cloudimg-amd64.img"
+  format = "qcow2"
 }
 
-module "main_arch_server" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/main_arch_server"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_controller.LAN_ids_by_names["main_server_LAN"]]
-  name                        = "main_arch_server"
-  vcpu                        = 2
-  memory                      = 4096
-  running                     = true
-  autostart                   = true
-  vm_count                    = 1
-  hostname                    = "main-arch"
-  public_key                  = tls_private_key.pki.public_key_openssh
+resource "libvirt_volume" "openstack_server_worker_image" {
+  name            = "openstack_server_worker.qcow2"
+  pool            = libvirt_pool.openstack_server.name
+  base_volume_id  = libvirt_volume.openstack_server_base_image.id
+  format = "qcow2"
 }
 
-module "replica_main_arch_server" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/replica_main_arch_server"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_controller.LAN_ids_by_names["main_server_LAN"]]
-  name                        = "replica_main_arch_server"
-  vcpu                        = 1
-  memory                      = 2048
-  running                     = true
-  autostart                   = true
-  vm_count                    = 1
-  hostname                    = "replica-main-arch"
-  public_key                  = tls_private_key.pki.public_key_openssh
+resource "libvirt_volume" "openstack_server_worker_image_for_servers" {
+  name            = "openstack_server_worker_for_servers.qcow2"
+  pool            = libvirt_pool.openstack_server.name
+  size = 240000000000
+  format = "qcow2"
 }
 
-module "master_arch" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/master_arch"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_controller.LAN_ids_by_names["main_server_LAN"]]
-  name                        = "master_arch"
-  vcpu                        = 2
-  memory                      = 2048
-  running                     = true
-  autostart                   = true
-  vm_count                    = 1
-  hostname                    = "master-arch"
-  public_key                  = tls_private_key.pki.public_key_openssh
+resource "libvirt_network" "network_up_link" {
+  name      = "openstack_server_up_link"
+  mode      = "nat"
+  addresses = [local.envs.KVM_NET]
+  autostart = true
+  dhcp {
+      enabled = false
+  }
 }
 
-module "test_arch_server" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/test_arch_servers"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_worker.LAN_ids_by_names["test_arch_servers_LAN"]]
-  name                        = "test_arch_server"
-  vcpu                        = 1
-  memory                      = 1024
-  running                     = true
-  autostart                   = true
-  vm_count                    = 2
-  hostname                    = "test-arch"
-  public_key                  = tls_private_key.pki.public_key_openssh
+resource "random_password" "pass" {
+  length      = 8
+  special     = false
+  numeric     = true
+  min_lower   = 3
+  min_numeric = 2
+  min_upper   = 3
 }
 
-module "k8s_cluster_control" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/k8s_cluster_control"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_worker.LAN_ids_by_names["k8s_LAN"]]
-  name                        = "k8s_control"
-  vcpu                        = 1
-  memory                      = 2048
-  running                     = true
-  autostart                   = true
-  vm_count                    = 1
-  hostname                    = "control-k8s"
-  public_key                  = tls_private_key.pki.public_key_openssh
+data "template_file" "user_data" {
+  template = file("cloud-init.cfg")
+  vars     = {"hostname"       = "openstack_server",
+              "domain"         = "soks.local",
+              "password"       = random_password.pass.result,
+              "ssh_public_key" = tls_private_key.pki.public_key_openssh,
+              "timezone"       = "Europe/Moscow"}
 }
 
-module "k8s_cluster_worker" {
-  source                      = "./modules/kvm"
-  pool_dir                    = "/opt/libvirt_data/k8s_cluster_worker"
-  base_image_path             = "/opt/iso/Arch-Linux-x86_64-cloudimg.qcow2"
-  UP_link_usable              = false
-  LAN_usable                  = false
-  LAN_interface_connect_by_id = [module.mikrotik_vm_worker.LAN_ids_by_names["k8s_LAN"]]
-  name                        = "k8s_worker"
-  vcpu                        = 1
-  memory                      = 1024
-  running                     = true
-  autostart                   = true
-  vm_count                    = 3
-  hostname                    = "worker-k8s"
-  public_key                  = tls_private_key.pki.public_key_openssh
+
+resource "libvirt_cloudinit_disk" "commoninit" {
+  name      = "commoninit.iso"
+  user_data = data.template_file.user_data.rendered
+  pool      = libvirt_pool.openstack_server.name
 }
 
-module "setup_mikrotik_control" {
-  source          = "./modules/vm_net_setup"
-  domain_name     = "${module.mikrotik_vm_controller.domain_name}_0"
-  address         = local.envs.MIKROTIK_ADDRESS
-  net_mask        = local.envs.MIKROTIK_NETMASK
-  interface       = "ether1"
-  path_for_output = "./outputs"
-  depends_on      = [ module.mikrotik_vm_controller ]
-}
+resource "libvirt_domain" "vm" {
+  name      = "openstack_server"
+  vcpu      = 4
+  memory    = 8192
+  running   = true
+  autostart = true
+  console {
+    type        = "pty"
+    target_type = "serial"
+    target_port = "0"
+  }
+  network_interface {
+    network_id     = libvirt_network.network_up_link.id
+    addresses      = [local.envs.UBUNTU_ADDRESS]
+    mac            = "AA:BB:CC:11:22:22"
+    wait_for_lease = true
+  }
+  disk {
+    volume_id = libvirt_volume.openstack_server_worker_image.id
+  }
+  disk {
+    volume_id = libvirt_volume.openstack_server_worker_image_for_servers.id
+  }
 
-module "setup_mikrotik_worker" {
-  source          = "./modules/vm_net_setup"
-  domain_name     = "${module.mikrotik_vm_worker.domain_name}_0"
-  path_for_output = "./outputs"
-  depends_on      = [ module.mikrotik_vm_worker]
+  cloudinit = libvirt_cloudinit_disk.commoninit.id
 }
-
-# module "get_up_link_address" {
-#   source          = "./modules/vm_net_info"
-#   max_vm_count    = module.mikrotik_vm_controller.max_vm_count
-#   domain_name     = module.mikrotik_vm_controller.domain_name
-#   path_for_output = "./outputs"
-#   depends_on = [ module.mikrotik_vm_controller, module.setup_net_address ]
-  # depends_on = [ module.k8s_cluster_control, module.k8s_cluster_worker, module.main_arch_server, module.mikrotik_vm_controller, module.mikrotik_vm_worker, module.test_arch_server ]
-# }

@@ -24,50 +24,11 @@ get_pass(){
     done
 }
 
-output_nftables() {
-    interface=$(ip -br a  | grep $(echo "$KVM_NET" |awk -F'/' '{ printf $1 }' | awk -F'.' '{ printf $1"."$2"."$3 }') | awk -F ' ' '{ printf $1 }')
-    cat << EOF
-table ip nat {
-    chain postrouting {
-        type nat hook postrouting priority 100; policy accept;
-        
-        # "masquerade" means the servers to which one connects from the VM can't tell packets are coming from the latter
-        ip saddr $KVM_NET masquerade
-    }
-}
-
-table inet filter {
-    # "input" is the name of the chain
-    chain input {
-        
-        # -------------------------------- qemu
-        iifname $interface accept  comment "accept from virtual VM"
-        
-        # packets that reach here are bound to be dropped
-        counter comment "count dropped packets"
-    }
-
-    chain forward {
-        type filter hook forward priority 0; policy drop;
-        
-        # -------------------------------- qemu
-        iifname $interface accept  comment "accept VM interface as input"
-        oifname $interface accept comment "accept VM interface as output"
-        
-        counter comment "count dropped packets"
-    }
-}
-EOF
-}
-
 get_pass
 echo $data | jq > ./creds/password.json
 
 sudo terraform output -raw private_key > ./creds/private_key.pem
-output_nftables > ./creds/nftables.conf
 
 echo "==============="
-echo "ssh -i ./creds/private_key.pem arch@{ip}"
-echo "==============="
-echo "sudo nft -f ./creds/nftables.conf"
+echo "ssh -i ./creds/private_key.pem ubuntu@$UBUNTU_ADDRESS"
 echo "==============="
